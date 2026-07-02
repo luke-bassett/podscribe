@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>Test Podcast</title>
+    <item>
+      <title>Episode Two: The Return</title>
+      <guid>ep-2</guid>
+      <pubDate>Sun, 28 Jun 2026 09:00:00 +0000</pubDate>
+      <enclosure url="https://example.com/audio/ep2.mp3" length="1234" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode One!</title>
+      <guid>ep-1</guid>
+      <pubDate>Sun, 21 Jun 2026 09:00:00 +0000</pubDate>
+      <enclosure url="https://example.com/audio/ep1.m4a" length="1234" type="audio/x-m4a"/>
+    </item>
+    <item>
+      <title>Blog post, no audio</title>
+      <guid>post-1</guid>
+      <pubDate>Sat, 20 Jun 2026 09:00:00 +0000</pubDate>
+    </item>
+  </channel>
+</rss>

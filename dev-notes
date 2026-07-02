@@ -1,0 +1,2 @@
+this looks good, it does what i want it to do, i think we can simplify the internals, it may come at the cost of generalizability but that's ok (YAGNI). the goal here is to go from podcast audio files to longer summaries like the 3000 word one. 
+i updated the prompt
