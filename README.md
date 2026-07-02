@@ -3,7 +3,7 @@
 Podcast audio → readable transcript → long summary, from a single command:
 
 ```sh
-podscribe run http://feeds.libsyn.com/93923/rss --match kolie --words 3000
+podscribe run https://feeds.example.com/bada-bing-radio/rss --match soprano --words 3000
 ```
 
 Transcription runs **locally** on Apple Silicon via [mlx-whisper](https://github.com/ml-explore/mlx-examples/tree/main/whisper); summarization runs through **Claude** by shelling out to `claude -p`, billed to your Claude subscription — no API key, no metered usage.
@@ -20,7 +20,7 @@ Transcription runs **locally** on Apple Silicon via [mlx-whisper](https://github
 | format | Groups segments into paragraphs (split on speech pauses > 2s, capped length) | `transcripts/<slug>.md` (readable transcript) | **fully local** |
 | summarize | Sends the transcript text to Claude with a ~N-word summary prompt | `transcripts/<slug>.summary.<N>w.md` | **cloud** (via `claude -p`) |
 
-`<slug>` is the publish date plus a slugified episode title, e.g. `2026-06-25-kolie-moore-overrated-and-underrated-factors-for-cycling-performance`.
+`<slug>` is the publish date plus a slugified episode title, e.g. `2026-06-25-tony-soprano-overrated-and-underrated-factors-in-waste-management`.
 
 ### Local vs cloud
 
@@ -62,7 +62,7 @@ podscribe run <rss-url>
 `--match` is a case-insensitive regex/substring on episode titles, applied before `--limit`:
 
 ```sh
-podscribe run <rss-url> --match "joe friel"
+podscribe run <rss-url> --match "paulie walnuts"
 ```
 
 ### Work through a backlog
@@ -103,15 +103,15 @@ On an M2 Max, the default `whisper-large-v3-turbo` transcribes at roughly **1–
 | `mlx-community/whisper-large-v3-turbo` (default) | ~1–2 min/hour of audio | best for podcast speech | ~1.6 GB |
 | `mlx-community/whisper-tiny` | seconds/hour | noticeable errors — fine for smoke tests | ~150 MB |
 
-Whisper still fumbles proper nouns occasionally ("coli moore" for Kolie Moore). The summary prompt tells Claude the text is raw speech-to-text, and it reliably corrects those from context — summaries usually read cleaner than the transcript.
+Whisper still fumbles proper nouns occasionally ("polly walnuts" for Paulie Walnuts). The summary prompt tells Claude the text is raw speech-to-text, and it reliably corrects those from context — summaries usually read cleaner than the transcript.
 
 ## Output example
 
 ```
-audio/2026-06-25-kolie-moore-overrated-and-underrated-....mp3          # original audio
-transcripts/2026-06-25-kolie-moore-....json                            # raw segments + metadata
-transcripts/2026-06-25-kolie-moore-....md                              # readable transcript
-transcripts/2026-06-25-kolie-moore-....summary.3000w.md               # the summary
+audio/2026-06-25-tony-soprano-overrated-and-underrated-....mp3         # original audio
+transcripts/2026-06-25-tony-soprano-....json                           # raw segments + metadata
+transcripts/2026-06-25-tony-soprano-....md                             # readable transcript
+transcripts/2026-06-25-tony-soprano-....summary.3000w.md              # the summary
 ```
 
 `audio/` and `transcripts/` are created in the current working directory and are gitignored.
