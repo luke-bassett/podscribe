@@ -30,10 +30,17 @@ def cmd_run(args) -> None:
     episodes = list(feed.fetch_episodes(args.url, limit=args.limit, order=args.order,
                                         match=args.match))
     print(f"run: {len(episodes)} episode(s)", file=sys.stderr)
+    failures = 0
     for i, episode in enumerate(episodes):
         print(f"[{i + 1}/{len(episodes)}] {episode.title}", file=sys.stderr)
-        episode = dl.download_episode(episode)
-        _process(episode, args)
+        try:
+            episode = dl.download_episode(episode)
+            _process(episode, args)
+        except Exception as e:  # one bad episode shouldn't kill a backlog run
+            failures += 1
+            print(f"error ({episode.title!r}): {e}", file=sys.stderr)
+    if failures:
+        sys.exit(f"{failures} of {len(episodes)} episode(s) failed")
 
 
 def cmd_summarize(args) -> None:

@@ -31,18 +31,22 @@ def download_episode(episode: Episode, dir: Path = DEFAULT_DIR) -> Episode:
         print(f"skip download (exists): {existing[0]}", file=sys.stderr)
         return episode
 
-    with httpx.stream("GET", episode.audio_url, follow_redirects=True, timeout=60) as response:
-        response.raise_for_status()
-        ext = _extension(str(response.url), response.headers.get("content-type", ""))
-        path = dir / (episode.slug() + ext)
-        tmp = path.with_suffix(path.suffix + ".part")
-        try:
-            with open(tmp, "wb") as f:
-                for chunk in response.iter_bytes():
-                    f.write(chunk)
-            tmp.rename(path)
-        finally:
-            tmp.unlink(missing_ok=True)
+    try:
+        with httpx.stream("GET", episode.audio_url, follow_redirects=True, timeout=60) as response:
+            response.raise_for_status()
+            ext = _extension(str(response.url), response.headers.get("content-type", ""))
+            path = dir / (episode.slug() + ext)
+            tmp = path.with_suffix(path.suffix + ".part")
+            try:
+                with open(tmp, "wb") as f:
+                    for chunk in response.iter_bytes():
+                        f.write(chunk)
+                tmp.rename(path)
+            finally:
+                tmp.unlink(missing_ok=True)
+    except httpx.HTTPError as e:
+        # surface as OSError so the CLI reports it cleanly instead of a traceback
+        raise OSError(f"download failed for {episode.audio_url}: {e}") from e
 
     episode.audio_path = str(path)
     print(f"downloaded: {path}", file=sys.stderr)

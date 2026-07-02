@@ -2,6 +2,29 @@
 
 Uses `claude -p` (headless mode), so usage draws on the Claude subscription
 the CLI is logged into — no API key or metered billing.
+
+Why `claude -p` and not the Anthropic API
+------------------------------------------
+This is a local, personal, run-on-your-Mac tool. Shelling out means zero
+setup for anyone who already has Claude Code logged in, and summaries cost
+nothing beyond the existing subscription. That's the whole value prop, so
+the trade-offs (no pinned model/temperature, unstructured text out, needs
+an interactive login on the box) don't bite here.
+
+When this stops being the right call — any of:
+  - it needs to run headless/server-side or in CI, where there's no
+    logged-in Claude Code (only an API key);
+  - you need a pinned model, temperature, or structured/reproducible output;
+  - volume grows enough that the subscription's rolling usage windows become
+    the bottleneck, or metered API billing is simply cheaper to reason about;
+  - you want to ship it to people who don't have Claude Code installed.
+
+How to switch when that day comes:
+  `summarize_text()` below is the *only* seam that talks to Claude — the
+  pipeline, filenames, idempotency, and `_prompt()` all stay put. Add the
+  `anthropic` dependency + an `ANTHROPIC_API_KEY`, and reimplement the body
+  of `summarize_text()` to call the Messages API with a current model id,
+  passing `_prompt(meta, words)` and the transcript text. Nothing else moves.
 """
 
 from __future__ import annotations
@@ -36,13 +59,16 @@ def _prompt(meta: dict, words: int) -> str:
 def summarize_text(text: str, meta: dict, words: int = DEFAULT_WORDS) -> str:
     if not shutil.which("claude"):
         raise OSError("`claude` CLI not found on PATH; install Claude Code or add it to PATH")
-    result = subprocess.run(
-        ["claude", "-p", _prompt(meta, words)],
-        input=text,
-        capture_output=True,
-        text=True,
-        timeout=TIMEOUT_SECONDS,
-    )
+    try:
+        result = subprocess.run(
+            ["claude", "-p", _prompt(meta, words)],
+            input=text,
+            capture_output=True,
+            text=True,
+            timeout=TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as e:
+        raise OSError(f"claude -p timed out after {TIMEOUT_SECONDS}s") from e
     if result.returncode != 0:
         raise OSError(f"claude -p failed: {result.stderr.strip() or result.stdout.strip()}")
     summary = result.stdout.strip()
