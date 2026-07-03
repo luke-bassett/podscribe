@@ -52,7 +52,8 @@ def _prompt(meta: dict, words: int) -> str:
         f"Write a summary of approximately {words} words covering the main topics, "
         f"arguments, and any concrete takeaways. Write an easily digestible summary "
         f"(markdown; use headings and bullet lists where they help organize the "
-        f"information). Respond with only the summary text."
+        f"information). Begin with a single `#` heading naming the episode. "
+        f"Respond with only the summary text."
     )
 
 
@@ -103,9 +104,7 @@ def summarize_episode(
 
     print(f"summarizing (~{words} words via claude -p): {episode.transcript_path}", file=sys.stderr)
     summary = summarize_text(text, meta, words=words)
-
-    header = f"# {meta['title']} — summary\n" if meta.get("title") else "# Summary\n"
-    path.write_text(f"{header}\n{summary}\n")
+    path.write_text(summary + "\n")
     episode.summary_path = str(path)
     print(f"summarized: {path}", file=sys.stderr)
     return episode

@@ -35,8 +35,7 @@ def test_summarize_writes_file_and_sets_path(tmp_path, monkeypatch):
     out = Path(episode.summary_path)
     content = out.read_text()
     assert out.name == "2026-06-28-episode-two-the-return.summary.42w.md"
-    assert content.startswith("# Episode Two: The Return — summary")
-    assert "A fine summary." in content
+    assert content.startswith("A fine summary.")  # claude output verbatim, no added header
     assert "approximately 42 words" in content  # prompt reached the CLI
 
 
