@@ -37,7 +37,7 @@ from pathlib import Path
 from .models import Episode
 from .transcribe import load_segments
 
-DEFAULT_DIR = Path("transcripts")
+DEFAULT_DIR = Path("summaries")
 DEFAULT_WORDS = 3000
 TIMEOUT_SECONDS = 600
 

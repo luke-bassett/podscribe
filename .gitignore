@@ -12,3 +12,4 @@ wheels/
 # Pipeline outputs
 audio/
 transcripts/
+summaries/

@@ -18,7 +18,7 @@ Transcription runs **locally** on Apple Silicon via [mlx-whisper](https://github
 | download | Streams the episode audio | `audio/<slug>.mp3` | local (downloads from the podcast host) |
 | transcribe | Whisper speech-to-text on the GPU | `transcripts/<slug>.json` (timestamped segments + metadata) | **fully local** |
 | format | Groups segments into paragraphs (split on speech pauses > 2s, capped length) | `transcripts/<slug>.md` (readable transcript) | **fully local** |
-| summarize | Sends the transcript text to Claude with a ~N-word summary prompt | `transcripts/<slug>.summary.<N>w.md` | **cloud** (via `claude -p`) |
+| summarize | Sends the transcript text to Claude with a ~N-word summary prompt | `summaries/<slug>.summary.<N>w.md` | **cloud** (via `claude -p`) |
 
 `<slug>` is the publish date plus a slugified episode title, e.g. `2026-06-25-tony-soprano-overrated-and-underrated-factors-in-waste-management`.
 
@@ -111,10 +111,10 @@ Whisper still fumbles proper nouns occasionally ("polly walnuts" for Paulie Waln
 audio/2026-06-25-tony-soprano-overrated-and-underrated-....mp3         # original audio
 transcripts/2026-06-25-tony-soprano-....json                           # raw segments + metadata
 transcripts/2026-06-25-tony-soprano-....md                             # readable transcript
-transcripts/2026-06-25-tony-soprano-....summary.3000w.md              # the summary
+summaries/2026-06-25-tony-soprano-....summary.3000w.md                # the summary
 ```
 
-`audio/` and `transcripts/` are created in the current working directory and are gitignored.
+`audio/`, `transcripts/`, and `summaries/` are created in the current working directory and are gitignored.
 
 ## Library use
 
