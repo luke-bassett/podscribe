@@ -139,6 +139,7 @@ for ep in fetch_episodes("https://example.com/feed.xml", limit=1):
 - **`claude` CLI not found** — install Claude Code and log in; summaries need it. Transcription works without it.
 - **`ffmpeg` errors** — `brew install ffmpeg`.
 - **Summary command exits with a Claude usage-limit error** — you've hit your subscription's 5-hour usage window; the transcript stages already completed and are saved, so re-run later and it resumes at summarize.
+- **"Credit balance is too low"** — that's the *metered API* error, meaning `claude` authenticated with an `ANTHROPIC_API_KEY` instead of your subscription login. podscribe strips that variable from the subprocess since v0.1, so if you see this, update podscribe; the underlying cause is an API key in your environment (check `env`, shell rc files, and `launchctl getenv ANTHROPIC_API_KEY`).
 - **Transcript is lowercase with no punctuation** — shouldn't happen (podscribe disables Whisper's cross-window conditioning, the usual cause); if it does, delete the `.json` and re-transcribe, or try the full `mlx-community/whisper-large-v3` model.
 
 ## Development

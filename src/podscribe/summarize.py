@@ -29,6 +29,7 @@ How to switch when that day comes:
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import sys
@@ -66,6 +67,9 @@ def summarize_text(
 ) -> str:
     if not shutil.which("claude"):
         raise OSError("`claude` CLI not found on PATH; install Claude Code or add it to PATH")
+    # An ANTHROPIC_API_KEY in the environment would silently switch claude to
+    # metered API billing; strip it so summaries always bill the subscription.
+    env = {k: v for k, v in os.environ.items() if k not in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN")}
     try:
         result = subprocess.run(
             ["claude", "-p", "--model", model, _prompt(meta, words)],
@@ -73,6 +77,7 @@ def summarize_text(
             capture_output=True,
             text=True,
             timeout=TIMEOUT_SECONDS,
+            env=env,
         )
     except subprocess.TimeoutExpired as e:
         raise OSError(f"claude -p timed out after {TIMEOUT_SECONDS}s") from e
