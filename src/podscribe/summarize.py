@@ -39,7 +39,7 @@ from .transcribe import load_segments
 
 DEFAULT_DIR = Path("summaries")
 DEFAULT_WORDS = 3000
-DEFAULT_CLAUDE_MODEL = "sonnet"  # summaries are condensation, not interpretation
+DEFAULT_CLAUDE_MODEL = "opus"  # empirically better summaries than sonnet; worth the quota
 TIMEOUT_SECONDS = 600
 
 

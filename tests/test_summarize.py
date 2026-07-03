@@ -34,14 +34,14 @@ def test_summarize_writes_file_and_sets_path(tmp_path, monkeypatch):
     episode = summarize_episode(episode, dir=tmp_path, words=42)
     out = Path(episode.summary_path)
     content = out.read_text()
-    assert out.name == "2026-06-28-episode-two-the-return.summary.42w.sonnet.md"
+    assert out.name == "2026-06-28-episode-two-the-return.summary.42w.opus.md"
     assert content.startswith("A fine summary.")  # claude output verbatim, no added header
     assert "approximately 42 words" in content  # prompt reached the CLI
 
 
 def test_summarize_skips_existing(tmp_path, monkeypatch, capsys):
     _install_fake_claude(tmp_path, monkeypatch)
-    existing = tmp_path / "2026-06-28-episode-two-the-return.summary.3000w.sonnet.md"
+    existing = tmp_path / "2026-06-28-episode-two-the-return.summary.3000w.opus.md"
     existing.write_text("already here")
     episode = Episode(
         title="Episode Two: The Return",
