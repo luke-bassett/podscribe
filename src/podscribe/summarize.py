@@ -94,20 +94,24 @@ def summarize_episode(
     dir: Path = DEFAULT_DIR,
     words: int = DEFAULT_WORDS,
     model: str = DEFAULT_CLAUDE_MODEL,
+    force: bool = False,
 ) -> Episode:
     """Summarize episode.transcript_path into dir/<slug>.summary.<N>w.<model>.md.
 
-    Word target and model are part of the filename, so summaries at different
-    lengths/models coexist and skip-if-exists applies per combination.
+    The filename records the model, but skip-if-exists ignores it: a summary
+    at this word count from *any* model counts as done, so switching models
+    doesn't redo finished episodes. Pass force=True to generate anyway
+    (e.g. to add an opus version beside an existing sonnet one).
     """
     if not episode.transcript_path:
         raise ValueError(f"episode {episode.title!r} has no transcript_path; run transcribe first")
     dir.mkdir(parents=True, exist_ok=True)
-    path = dir / f"{episode.slug()}.summary.{words}w.{model.replace('/', '-')}.md"
-    if path.exists():
-        episode.summary_path = str(path)
-        print(f"skip summarize (exists): {path}", file=sys.stderr)
+    existing = sorted(dir.glob(f"{episode.slug()}.summary.{words}w.*.md"))
+    if existing and not force:
+        episode.summary_path = str(existing[0])
+        print(f"skip summarize (exists): {existing[0]}", file=sys.stderr)
         return episode
+    path = dir / f"{episode.slug()}.summary.{words}w.{model.replace('/', '-')}.md"
 
     meta, segments = load_segments(episode.transcript_path)
     meta.setdefault("title", episode.title)

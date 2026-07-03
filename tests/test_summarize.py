@@ -52,3 +52,24 @@ def test_summarize_skips_existing(tmp_path, monkeypatch, capsys):
     episode = summarize_episode(episode, dir=tmp_path)
     assert episode.summary_path == str(existing)
     assert existing.read_text() == "already here"
+
+
+def test_skip_ignores_model_but_force_overrides(tmp_path, monkeypatch):
+    _install_fake_claude(tmp_path, monkeypatch)
+    existing = tmp_path / "2026-06-28-episode-two-the-return.summary.3000w.opus.md"
+    existing.write_text("opus version")
+    episode = Episode(
+        title="Episode Two: The Return",
+        audio_url="u",
+        published="2026-06-28",
+        transcript_path=str(FIXTURES / "transcript.json"),
+    )
+    # different model, same word count: still skips
+    episode = summarize_episode(episode, dir=tmp_path, model="sonnet")
+    assert episode.summary_path == str(existing)
+    assert not (tmp_path / "2026-06-28-episode-two-the-return.summary.3000w.sonnet.md").exists()
+
+    # force: generates the sonnet version alongside
+    episode = summarize_episode(episode, dir=tmp_path, model="sonnet", force=True)
+    assert episode.summary_path.endswith(".summary.3000w.sonnet.md")
+    assert existing.read_text() == "opus version"  # opus file untouched

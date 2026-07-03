@@ -30,7 +30,7 @@ Transcription runs **locally** on Apple Silicon via [mlx-whisper](https://github
 
 ### Idempotency
 
-Every stage skips work whose output file already exists, so re-running a feed only processes new episodes — safe to run on a schedule. Summaries are **per-length and per-model** (both live in the filename): `--words 500` and `--words 3000` are different artifacts and coexist, as do `--claude-model opus` and `--claude-model sonnet`; re-running the same combination skips. Opus is the default (noticeably better summaries in side-by-side checks); `--claude-model sonnet` is faster and consumes subscription quota much more slowly if you're working through a big backlog.
+Every stage skips work whose output file already exists, so re-running a feed only processes new episodes — safe to run on a schedule. Summary filenames record the word count **and** the model (`.summary.3000w.opus.md`), but the skip check ignores the model: a summary at that word count from *any* model counts as done, so switching `--claude-model` mid-backlog doesn't redo finished episodes. Use `--force` to generate anyway (e.g. to add an opus version of an episode already summarized with sonnet). Opus is the default (noticeably better summaries in side-by-side checks); `--claude-model sonnet` is faster and consumes subscription quota more slowly on a big backlog.
 
 ## Requirements
 

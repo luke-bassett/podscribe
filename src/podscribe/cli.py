@@ -21,7 +21,8 @@ def _process(episode: Episode, args) -> Episode:
         episode = tr.transcribe_episode(episode, model=args.model,
                                         verbose=True if args.verbose else False)
         episode = fmt.format_episode(episode)
-    episode = summ.summarize_episode(episode, words=args.words, model=args.claude_model)
+    episode = summ.summarize_episode(episode, words=args.words, model=args.claude_model,
+                                     force=args.force)
     print(episode.summary_path)
     return episode
 
@@ -62,6 +63,9 @@ def _add_common_args(p: argparse.ArgumentParser) -> None:
                    help=f"Whisper model (default: {tr.DEFAULT_MODEL})")
     p.add_argument("--claude-model", default=summ.DEFAULT_CLAUDE_MODEL, metavar="MODEL",
                    help=f"Claude model for summaries (default: {summ.DEFAULT_CLAUDE_MODEL})")
+    p.add_argument("--force", action="store_true",
+                   help="summarize even if a summary at this word count already exists "
+                        "(any model); use to add another model's version")
     p.add_argument("--verbose", action="store_true",
                    help="print decoded text live instead of a progress bar")
 
