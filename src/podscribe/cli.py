@@ -21,7 +21,7 @@ def _process(episode: Episode, args) -> Episode:
         episode = tr.transcribe_episode(episode, model=args.model,
                                         verbose=True if args.verbose else False)
         episode = fmt.format_episode(episode)
-    episode = summ.summarize_episode(episode, words=args.words)
+    episode = summ.summarize_episode(episode, words=args.words, model=args.claude_model)
     print(episode.summary_path)
     return episode
 
@@ -60,6 +60,8 @@ def _add_common_args(p: argparse.ArgumentParser) -> None:
                    help=f"approximate summary length in words (default: {summ.DEFAULT_WORDS})")
     p.add_argument("--model", default=tr.DEFAULT_MODEL,
                    help=f"Whisper model (default: {tr.DEFAULT_MODEL})")
+    p.add_argument("--claude-model", default=summ.DEFAULT_CLAUDE_MODEL, metavar="MODEL",
+                   help=f"Claude model for summaries (default: {summ.DEFAULT_CLAUDE_MODEL})")
     p.add_argument("--verbose", action="store_true",
                    help="print decoded text live instead of a progress bar")
 

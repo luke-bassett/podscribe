@@ -31,7 +31,7 @@ def test_summarize_transcript_json(tmp_path):
     )
     assert result.returncode == 0, result.stderr
     out = tmp_path / result.stdout.strip()
-    assert out.name == "transcript.summary.3000w.md"
+    assert out.name == "transcript.summary.3000w.sonnet.md"
     assert "A fine summary." in out.read_text()
 
 

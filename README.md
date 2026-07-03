@@ -18,7 +18,7 @@ Transcription runs **locally** on Apple Silicon via [mlx-whisper](https://github
 | download | Streams the episode audio | `audio/<slug>.mp3` | local (downloads from the podcast host) |
 | transcribe | Whisper speech-to-text on the GPU | `transcripts/<slug>.json` (timestamped segments + metadata) | **fully local** |
 | format | Groups segments into paragraphs (split on speech pauses > 2s, capped length) | `transcripts/<slug>.md` (readable transcript) | **fully local** |
-| summarize | Sends the transcript text to Claude with a ~N-word summary prompt | `summaries/<slug>.summary.<N>w.md` | **cloud** (via `claude -p`) |
+| summarize | Sends the transcript text to Claude with a ~N-word summary prompt | `summaries/<slug>.summary.<N>w.<model>.md` | **cloud** (via `claude -p`) |
 
 `<slug>` is the publish date plus a slugified episode title, e.g. `2026-06-25-tony-soprano-overrated-and-underrated-factors-in-waste-management`.
 
@@ -30,7 +30,7 @@ Transcription runs **locally** on Apple Silicon via [mlx-whisper](https://github
 
 ### Idempotency
 
-Every stage skips work whose output file already exists, so re-running a feed only processes new episodes — safe to run on a schedule. Summaries are **per-length**: `--words 500` and `--words 3000` are different artifacts and coexist; re-running with the same `--words` skips.
+Every stage skips work whose output file already exists, so re-running a feed only processes new episodes — safe to run on a schedule. Summaries are **per-length and per-model** (both live in the filename): `--words 500` and `--words 3000` are different artifacts and coexist, as do `--claude-model sonnet` and `--claude-model opus`; re-running the same combination skips. Sonnet is the default — condensation doesn't need a bigger model, and it consumes subscription quota much more slowly.
 
 ## Requirements
 
@@ -90,6 +90,7 @@ podscribe summarize transcripts/<slug>.json --words 500
 | `--order newest\|oldest\|feed` | run | newest | sort by publish date, or keep the publisher's order |
 | `--match PATTERN` | run | — | filter episode titles |
 | `--model <hf-repo>` | both | `mlx-community/whisper-large-v3-turbo` | Whisper model |
+| `--claude-model M` | both | `sonnet` | Claude model for summaries (any `claude --model` value) |
 | `--verbose` | both | off | stream decoded text live instead of a progress bar |
 
 Progress goes to stderr; the paths of finished summaries go to stdout (so `podscribe run ... | pbcopy` grabs the paths).
@@ -111,7 +112,7 @@ Whisper still fumbles proper nouns occasionally ("polly walnuts" for Paulie Waln
 audio/2026-06-25-tony-soprano-overrated-and-underrated-....mp3         # original audio
 transcripts/2026-06-25-tony-soprano-....json                           # raw segments + metadata
 transcripts/2026-06-25-tony-soprano-....md                             # readable transcript
-summaries/2026-06-25-tony-soprano-....summary.3000w.md                # the summary
+summaries/2026-06-25-tony-soprano-....summary.3000w.sonnet.md         # the summary
 ```
 
 `audio/`, `transcripts/`, and `summaries/` are created in the current working directory and are gitignored.

@@ -39,6 +39,7 @@ from .transcribe import load_segments
 
 DEFAULT_DIR = Path("summaries")
 DEFAULT_WORDS = 3000
+DEFAULT_CLAUDE_MODEL = "sonnet"  # summaries are condensation, not interpretation
 TIMEOUT_SECONDS = 600
 
 
@@ -57,12 +58,17 @@ def _prompt(meta: dict, words: int) -> str:
     )
 
 
-def summarize_text(text: str, meta: dict, words: int = DEFAULT_WORDS) -> str:
+def summarize_text(
+    text: str,
+    meta: dict,
+    words: int = DEFAULT_WORDS,
+    model: str = DEFAULT_CLAUDE_MODEL,
+) -> str:
     if not shutil.which("claude"):
         raise OSError("`claude` CLI not found on PATH; install Claude Code or add it to PATH")
     try:
         result = subprocess.run(
-            ["claude", "-p", _prompt(meta, words)],
+            ["claude", "-p", "--model", model, _prompt(meta, words)],
             input=text,
             capture_output=True,
             text=True,
@@ -82,16 +88,17 @@ def summarize_episode(
     episode: Episode,
     dir: Path = DEFAULT_DIR,
     words: int = DEFAULT_WORDS,
+    model: str = DEFAULT_CLAUDE_MODEL,
 ) -> Episode:
-    """Summarize episode.transcript_path into dir/<slug>.summary.<N>w.md.
+    """Summarize episode.transcript_path into dir/<slug>.summary.<N>w.<model>.md.
 
-    The word target is part of the filename, so summaries at different
-    lengths coexist and skip-if-exists applies per length.
+    Word target and model are part of the filename, so summaries at different
+    lengths/models coexist and skip-if-exists applies per combination.
     """
     if not episode.transcript_path:
         raise ValueError(f"episode {episode.title!r} has no transcript_path; run transcribe first")
     dir.mkdir(parents=True, exist_ok=True)
-    path = dir / f"{episode.slug()}.summary.{words}w.md"
+    path = dir / f"{episode.slug()}.summary.{words}w.{model.replace('/', '-')}.md"
     if path.exists():
         episode.summary_path = str(path)
         print(f"skip summarize (exists): {path}", file=sys.stderr)
@@ -102,8 +109,9 @@ def summarize_episode(
     meta.setdefault("feed_title", episode.feed_title)
     text = "\n".join(s.text.strip() for s in segments if s.text.strip())
 
-    print(f"summarizing (~{words} words via claude -p): {episode.transcript_path}", file=sys.stderr)
-    summary = summarize_text(text, meta, words=words)
+    print(f"summarizing (~{words} words via claude -p --model {model}): {episode.transcript_path}",
+          file=sys.stderr)
+    summary = summarize_text(text, meta, words=words, model=model)
     path.write_text(summary + "\n")
     episode.summary_path = str(path)
     print(f"summarized: {path}", file=sys.stderr)
